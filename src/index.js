@@ -1,11 +1,16 @@
-class Steam {
-    constructor(value) {
-        this.value = value;
+class Stream {
+    constructor(initValue) {
+        this.value = initValue;
         this.subscribers = [];
     }
 
+    
     map(fn) {
-        return new Steam(fn(this.value));
+        // create a new stream with transformed value
+        let stream = new Stream(fn(this.value));
+        // add the new stream's emit method as a subscriber to the current stream
+        this.subscribers.push(stream.emit.bind(stream));
+        return stream;
     }
 
     emit(value) {
@@ -14,8 +19,14 @@ class Steam {
     }
 }
 
-let nums = new Steam(1);
-let doubleNums = nums.map(x => x * 2);
+let priceStream = new Stream(100);
+let discountedPrice = priceStream.map(x => x * 0.5); // 50 percent discount
 
-doubleNums.emit(2);
-nums.emit(3);
+priceStream.emit(180);
+console.log("Initial price", priceStream.value);
+console.log("Discounted price", discountedPrice.value);
+
+priceStream.emit(200);
+console.log("Initial price", priceStream.value);
+console.log("Discounted price", discountedPrice.value);
+
